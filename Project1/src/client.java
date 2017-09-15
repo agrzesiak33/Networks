@@ -14,34 +14,37 @@ public class client
 {
 	public static void main(String args[]) throws IOException 
 	{
-		String request = "C:/Users/agrze/Documents/Fall 2017/CS - 460 Networks/Projects/Project1/src/test.txt";
+		String request = "somedomain.com /test.txt";
 		int port = 5678;
-		int chunkSize = 20;
 		String ip =  "127.0.0.1";
 		
 		Socket socket = new Socket(ip, port);
-		InputStream fromServer = socket.getInputStream();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		DataInputStream dataIn = new DataInputStream(socket.getInputStream());
 		DataOutputStream dataOut = new DataOutputStream(socket.getOutputStream());
 		
-		PrintStream ps = new PrintStream(socket.getOutputStream());
-		//ps.println(request);
 		dataOut.writeUTF(request);
 		
-		byte[] buffer = new byte[chunkSize];
-		//FileOutputStream out = new FileOutputStream(request);
-		while(fromServer.read(buffer) >= 0)
+		//	Wait for the server to send us back a response. 
+		String[] header = dataIn.readUTF().split(" ", 3);
+		if(!header[1].equals("200"))
 		{
-			System.out.println(Arrays.toString(buffer));
+			System.out.println(header);
+			String error = dataIn.readUTF();
+			System.out.println(error);
+		}
+		
+		
+		String bufferStr = new String();
+		while((bufferStr = dataIn.readUTF()) != "")
+		{
+			System.out.println(bufferStr);
+			//	TODO need to output somewhere else
 		}
 		
 		socket.close();
 		reader.close();
 		dataIn.close();
-		ps.close();
-		//out.close();
-		
 	}
 	
 }
