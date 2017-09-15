@@ -11,6 +11,8 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -32,12 +34,11 @@ public class server {
 		FileInputStream fileIn = null;
 		BufferedInputStream fileInput = null;
 		File tempFile = null;
-		StringBuilder header;
+		String header200 = "HTTP/1.1 200 OK \r\n\r\n";
+		String header404 = "HTTP/1.1 404 Not Found\r\n\r\n";
+		String header400 = "HTTP/1.1 400 Invalid Request";
 		
 		int chunkSize = 20; 
-		
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-		DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
 		while (true)
 		{
@@ -49,20 +50,27 @@ public class server {
 			
 			try
 			{
-				scanner = new Scanner(socket.getInputStream());
 				String request = dataIn.readUTF();
+				System.out.printf("Message: %s\n", request);
+				
+				String fileName = request.split(" ")[1];
+				fileName = fileName.substring(1, fileName.length());
+				String directory = System.getProperty("user.dir");
+				System.out.printf("Filename : %s", fileName);
+				
 				
 				//	TODO Deal with if the request is invalid
 				//ps.println("*400");
 				//System.out.printf("Request %s is invalid \n", request);
 				
 				// Open the file if possible
-				//fileIn = new FileInputStream(request);
-				fileInput = new BufferedInputStream(new FileInputStream(request));
-				//tempFile = new File(request);
+				String fullPath = directory + File.separator + fileName;
+				fullPath = fullPath.replace("\\", "/");
+				fileInput = new BufferedInputStream(new FileInputStream(fullPath));
+				//C:\Users\agrze\Documents\Fall 2017\CS - 460 Networks\Networks
 				
 				//TODO Send a header 
-				//header = getHeader(dateFormat, timeFormat, tempFile.length());
+				dataOut.writeUTF(header200);
 				
 				//	Break up the message into 20kb chunks
 				byte[] buff = new byte[chunkSize];
@@ -71,18 +79,16 @@ public class server {
 				while((filelength = fileInput.read(buff)) >= 0)
 				{
 					System.out.println(Arrays.toString(buff));
-					dataOut.write(buff);
+					dataOut.writeUTF(new String(buff));
+					//dataOut.write(buff);
 					dataOut.flush();
-					//ps.print(buff);
-					//ps.flush();
+
 				}
-				//System.out.printf("Succesfully sent %s over port %d", request, port);
+				System.out.printf("Succesfully sent %s over port %d", request, port);
 				
 				//	Close the connections
 				dataOut.close();
 				fileInput.close();
-				//fileIn.close();
-				scanner.close();
 				socket.close();
 				ps.close();
 				
@@ -90,37 +96,18 @@ public class server {
 			//	Send 404 if no file with that name
 			catch(FileNotFoundException e)
 			{
-				ps.println("*404");
-				System.out.printf(e.getLocalizedMessage().toString());
+				dataOut.writeUTF(header404);
+				dataOut.writeUTF("<html><head></head><body><h1>404 Not Found</h1></body></html>\r\n");
+				System.out.printf(e.getMessage().toString());
 			}
 			catch(Exception e)
 			{
-				ps.println("*400");
+				dataOut.writeUTF(header400);
 				System.out.println("Error with request" + e.getMessage().toString());
 			}
 		}
 		//serverSock.close();
 		//socket.close();
 		
-	}
-	
-	
-	private static StringBuilder getHeader(DateFormat dateFormat, DateFormat timeFormat, long fileSize)
-	{
-		StringBuilder header = new StringBuilder();
-		header.append("Date: ");
-		Date date = new Date();
-		header.append(dateFormat.format(date));
-		header.append('\n');
-		
-		header.append("Time: ");
-		header.append(timeFormat.format(date));
-		header.append('\n');
-		
-		header.append("Size: ");
-		header.append(String.valueOf(fileSize));
-		header.append('\n');
-		
-		return header;
 	}
 }
