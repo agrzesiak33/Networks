@@ -14,7 +14,7 @@ public class client
 {
 	public static void main(String args[]) throws IOException 
 	{
-		String request = "somedomain.com /test.txt";
+		String request = "something /test.txt";
 		int port = 5678;
 		String ip =  "127.0.0.1";
 		
