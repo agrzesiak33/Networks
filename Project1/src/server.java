@@ -38,7 +38,7 @@ public class server {
 		String header404 = "HTTP/1.1 404 Not Found\r\n\r\n";
 		String header400 = "HTTP/1.1 400 Invalid Request";
 		
-		int chunkSize = 20; 
+		int chunkSize = 20000; 
 
 		while (true)
 		{
@@ -59,9 +59,13 @@ public class server {
 				System.out.printf("Filename : %s", fileName);
 				
 				
-				//	TODO Deal with if the request is invalid
-				//ps.println("*400");
-				//System.out.printf("Request %s is invalid \n", request);
+				//	TODO Find out when the request is invalid
+				boolean isBadRequest = false;
+				if(isBadRequest)
+				{
+					dataOut.writeUTF(header400);
+					dataOut.writeUTF("<html><head></head><body><h1>400 Bad Request</h1></body></html>\r\n");
+				}
 				
 				// Open the file if possible
 				String fullPath = directory + File.separator + fileName;
