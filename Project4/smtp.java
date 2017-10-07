@@ -1,6 +1,6 @@
 import java.io.*;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.*;
 
 public class smtp {
 
@@ -9,83 +9,90 @@ public class smtp {
 	{
 		String message = "\r\nHere is my test message";
 		
-		String mailServer = "$@localhost";
-		String hostName = "someName";
-		String from = "someFrom";
-		String to = "somtTo";
+		String mailServer = "localhost";
+		String hostName = "alex-VirtualBox";
+		String from = "agrzesiak@hotmail.com";
+		String to = "agrzesiak@hotmail.com";
 		
 		Socket mailSocket;
 		InputStream inputStream;
-		OutputStream outputStream;
+		OutputStream toMailServer;
 		BufferedReader fromMailServer;
-		PrintWriter toMailServer;
+
+		String command;
 		
-		mailSocket = new Socket(mailServer, 6789);
+		mailSocket = new Socket(mailServer, 25);
+		System.out.println("Connected to the server.");;
 		
 		inputStream = mailSocket.getInputStream();
-		outputStream = mailSocket.getOutputStream();
+		toMailServer = mailSocket.getOutputStream();
 		fromMailServer = new BufferedReader(new InputStreamReader(inputStream));
-		toMailServer = new PrintWriter(new OutputStreamWriter(outputStream));
-		
-		System.out.println("HELO " + hostName);
-		toMailServer.println("HELO " + hostName);
-		
+
 		String input = fromMailServer.readLine();
-		System.out.println(input);
-		if(input.substring(0,3) != "250")
+		System.out.println("From server: " + input + "\n");
+		
+		command = "HELO " + hostName + "\r\n";
+		System.out.print(command);
+		toMailServer.write(command.getBytes());		
+		input = fromMailServer.readLine();
+		System.out.println("After HELO: " + input + "\n");
+		if(!input.startsWith("250"))
 		{
-			System.out.println("250 reply not received from server");
+			System.out.println("250 reply not received from server.");
 		}
 		
-		System.out.println("MAIL From:< " + from + ">");
-		toMailServer.println("MAIL From:< " + from + ">");
-		
+		command = "MAIL From: < " + from + ">\r\n";
+		System.out.print(command);
+		toMailServer.write(command.getBytes());
 		input = fromMailServer.readLine();
-		System.out.println(input);
-		if(input.substring(0,3) != "250")
+		System.out.println("After MAIL From: " + input + "\n");
+		if(!input.startsWith("250"))
 		{
-			System.out.println("250 reply not received from server");
+			System.out.println("250 reply not received from server.");
 		}
 		
-		System.out.println("RCPT TO:< " + to + ">");
-		toMailServer.println("RCPT TO:< " + to + ">");
-		
+		command = "RCPT TO:< " + to + ">\r\n";
+		System.out.print(command);
+		toMailServer.write(command.getBytes());
 		input = fromMailServer.readLine();
-		System.out.println(input);
-		if(input.substring(0,3) != "250")
+		System.out.println("After RCPT TO: " + input + "\n");
+		if(!input.startsWith("250"))
 		{
-			System.out.println("250 reply not received from server");
+			System.out.println("250 reply not received from server.");
 		}
 		
-		System.out.println("DATA");
-		toMailServer.println("DATA");
-		
+		command = "DATA\r\n";
+		System.out.print(command);
+		toMailServer.write(command.getBytes());
 		input = fromMailServer.readLine();
-		System.out.println(input);
-		if(input.substring(0,3) != "354")
+		System.out.println("After DATA: " + input + "\n");
+		if(!input.startsWith("354"))
 		{
-			System.out.println("354 reply not received from server");
+			System.out.println("354 reply not received from server.");
 		}
 
-		toMailServer.println("SUBJECT: my subject");
-		toMailServer.println(message);
-		toMailServer.println(".");
-
+		command = "SUBJECT:  Here is my subject\r\n";
+		System.out.print(command);
+		toMailServer.write(command.getBytes());
+		toMailServer.write(message.getBytes());
+		command = "\r\n.\r\n";
+		toMailServer.write(command.getBytes());
+		
 		input = fromMailServer.readLine();
 		System.out.println(input);
-		if(input.substring(0,3) != "250")
+		if(!input.startsWith("250"))
 		{
-			System.out.println("250 reply not received from server");
+			System.out.println("250 reply not received from server.");
 		}
 		
-		System.out.println("QUIT");
-		toMailServer.println("QUIT");
-
+		command = "QUIT\r\n";
+		System.out.print(command);		
+		toMailServer.write(command.getBytes());
 		input = fromMailServer.readLine();
-		System.out.println(input);
-		if(input.substring(0,3) != "221")
+		System.out.println("After QUIT: " + input);
+		if(!input.startsWith("221"))
 		{
-			System.out.println("221 reply not received from server");
+			System.out.println("221 reply not received from receiver");
 		}
 		
 	}
