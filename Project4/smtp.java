@@ -32,29 +32,61 @@ public class smtp {
 		
 		String input = fromMailServer.readLine();
 		System.out.println(input);
+		if(input.substring(0,3) != "250")
+		{
+			System.out.println("250 reply not received from server");
+		}
 		
 		System.out.println("MAIL From:< " + from + ">");
 		toMailServer.println("MAIL From:< " + from + ">");
 		
 		input = fromMailServer.readLine();
 		System.out.println(input);
+		if(input.substring(0,3) != "250")
+		{
+			System.out.println("250 reply not received from server");
+		}
 		
 		System.out.println("RCPT TO:< " + to + ">");
 		toMailServer.println("RCPT TO:< " + to + ">");
 		
 		input = fromMailServer.readLine();
 		System.out.println(input);
+		if(input.substring(0,3) != "250")
+		{
+			System.out.println("250 reply not received from server");
+		}
 		
 		System.out.println("DATA");
 		toMailServer.println("DATA");
-		toMailServer.println(message);
-		toMailServer.println(".");
 		
 		input = fromMailServer.readLine();
 		System.out.println(input);
+		if(input.substring(0,3) != "354")
+		{
+			System.out.println("354 reply not received from server");
+		}
+
+		toMailServer.println("SUBJECT: my subject");
+		toMailServer.println(message);
+		toMailServer.println(".");
+
+		input = fromMailServer.readLine();
+		System.out.println(input);
+		if(input.substring(0,3) != "250")
+		{
+			System.out.println("250 reply not received from server");
+		}
 		
 		System.out.println("QUIT");
 		toMailServer.println("QUIT");
+
+		input = fromMailServer.readLine();
+		System.out.println(input);
+		if(input.substring(0,3) != "221")
+		{
+			System.out.println("221 reply not received from server");
+		}
 		
 	}
 }
