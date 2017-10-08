@@ -1,0 +1,8 @@
+==========TO COMPILE=========
+1) Navigate to the containing folder
+2) Type make
+
+
+============TO RUN==========
+1) Type 'java smtp [Mail Server] [Host Name] [To] [From]'
+	---Example: 'java smtp localhost bob-VirtualBox bob@localhost bob@localhost'
