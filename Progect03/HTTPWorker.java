@@ -1,9 +1,6 @@
 import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,36 +24,29 @@ public class HTTPWorker implements Runnable
 		
 		OutputStream out = null;
 		InputStream dataIn = null;
+		
 		BufferedInputStream fileInput = null;
-		BufferedWriter writer = null;
-		try {
-			writer = new BufferedWriter(new FileWriter("output.txt"));
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
 		try
 		{
 			// open data streams for input and output
 			dataIn = clientSocket.getInputStream();
 			out = clientSocket.getOutputStream();
 			
-			
-			System.out.println("Waiting for the request");
+			//	Read in the GET request coming from the client
 			byte[] buffer = new byte[2000];
-			int request = dataIn.read(buffer);
+			dataIn.read(buffer);
+			String firstLine =  new String(buffer);
 			
-			for(int i = 0; i<request; i++)
-				writer.write(buffer[i]);
-			writer.close();
-			//System.out.println("Request: " + buffer.);
-			//System.out.println("Opening the file");
-			fileInput = new BufferedInputStream(new FileInputStream("page.html"));
+			// 	The file name we want is the 2nd word of the first line with the first char excluded
+			String fileName = firstLine.split("\n")[0].split(" ")[1].substring(1);
 			
+			fileInput = new BufferedInputStream(new FileInputStream(fileName));
+			
+			//	Let the client know everything is ok and the data is coming.
 			out.write(header200.getBytes());
 			out.flush();
 			
-			System.out.println("Outputting the file.");
+			//	Send the data to the client in 2k chunks
 			buffer = new byte[2000];
 			@SuppressWarnings("unused")
 			int fileLength;
@@ -69,31 +59,22 @@ public class HTTPWorker implements Runnable
 		catch(FileNotFoundException e)
 		{
 			try {
-				System.out.println("Could not find the file");
+				System.out.println("Could not find the file. " + e.getLocalizedMessage());
 				out.write(header404.getBytes());
 				out.flush();
-				
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			} catch (IOException e1) {}
 		} 
 		catch (IOException e) {
 			try {
 				out.write(header400.getBytes());
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			} catch (IOException e1) {}
 		}
 		System.out.println("All done");
 		try {
 			dataIn.close();
 			out.close();
 			fileInput.close();
-		} catch (Exception e) {
-
-		}
+		} catch (Exception e) {}
 		
 	}
 
