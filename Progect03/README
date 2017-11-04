@@ -1,0 +1,10 @@
+============ COMPILATION ==========
++	Navigate to the directory with the code
++	Run 'make' in the command line
+
+============ Running ==============
++ 	Run 'java StartServer' in the command line
+
+
+============ Quitting =============
++	Click any key to gracefully shut the server down.
